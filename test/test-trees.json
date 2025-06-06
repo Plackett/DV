@@ -1,0 +1,67 @@
+// test-trees.json
+{
+  "simpleLinearTree": {
+    "description": "A basic linear graph for depth and simple path testing.",
+    "nodes": [
+      {"parent": 0, "id": 1},
+      {"parent": 1, "id": 2},
+      {"parent": 2, "id": 3}
+    ]
+  },
+  "balancedBinaryTreeDepth2": {
+    "description": "A small balanced binary tree.",
+    "nodes": [
+      {"parent": 0, "id": 1},
+      {"parent": 0, "id": 2},
+      {"parent": 1, "id": 3},
+      {"parent": 1, "id": 4},
+      {"parent": 2, "id": 5},
+      {"parent": 2, "id": 6}
+    ]
+  },
+  "unbalancedTree": {
+    "description": "An unbalanced tree to test layout and depth calculations.",
+    "nodes": [
+      {"parent": 0, "id": 1},
+      {"parent": 0, "id": 2},
+      {"parent": 1, "id": 3},
+      {"parent": 3, "id": 4},
+      {"parent": 4, "id": 5},
+      {"parent": 2, "id": 6},
+      {"parent": 6, "id": 7}
+    ]
+  },
+  "singleChildAtDepth": {
+    "description": "A root with one child at a specific angle.",
+    "nodes": [
+      {"parent": 0, "id": 1}
+    ]
+  },
+  "multipleChildrenAtSameDepth": {
+    "description": "Multiple children directly under the root for angular distribution testing.",
+    "nodes": [
+      {"parent": 0, "id": 1},
+      {"parent": 0, "id": 2},
+      {"parent": 0, "id": 3},
+      {"parent": 0, "id": 4}
+    ]
+  },
+  "complexRadialTest": {
+    "description": "A more complex structure to test radial layout intricacies.",
+    "nodes": [
+      {"parent": 0, "id": 1},
+      {"parent": 0, "id": 2},
+      {"parent": 0, "id": 3},
+      {"parent": 1, "id": 4},
+      {"parent": 1, "id": 5},
+      {"parent": 2, "id": 6},
+      {"parent": 2, "id": 7},
+      {"parent": 3, "id": 8},
+      {"parent": 4, "id": 9},
+      {"parent": 4, "id": 10},
+      {"parent": 6, "id": 11},
+      {"parent": 6, "id": 12},
+      {"parent": 8, "id": 13}
+    ]
+  }
+}

@@ -1,6 +1,9 @@
 {
-  "name": "@vitest/example-test",
+  "name": "radial-tree-visualizer",
   "type": "module",
+  "version": "1.0.0",
+  "description": "A tree visualizer for radial diagrams.",
+  "author": "Niko Krinos",
   "private": true,
   "license": "MIT",
   "main": "index.js",
