@@ -10,7 +10,8 @@
   "scripts": {
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "dev": "tsx watch ./src/main.ts"
   },
   "devDependencies": {
     "@vitest/ui": "latest",
@@ -19,5 +20,8 @@
   },
   "stackblitz": {
     "startCommand": "npm run test:ui"
+  },
+  "dependencies": {
+    "tsx": "^4.19.4"
   }
 }
