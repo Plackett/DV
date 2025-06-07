@@ -75,18 +75,18 @@ export class Node {
 
 // this section is for when it actually becomes a picture
 // ------------------------------------------------------
-export interface NodeLayoutData {
-    id: number
-    x: number
-    y: number
-    depth: number
-    angle: number
-    radius: number
+export class NodeLayoutData {
+    id: number = 0
+    x: number = 0
+    y: number = 0
+    depth: number = 0
+    angle: number = 0
+    radius: number = 0
 }
 
-export interface EdgeLayoutData {
-    sourceID: number
-    targetID: number
+export class EdgeLayoutData {
+    sourceID: number = 0
+    targetID: number = 0
 }
 
 interface LayoutCalculator {
@@ -270,7 +270,7 @@ export class VerticalLayoutCalculator implements LayoutCalculator {
                     layoutMap.set(child.id, {
                         id: child.id,
                         x: startX,
-                        y: -1 * childDepth * this.verticalSpacing,
+                        y: childDepth * this.verticalSpacing,
                         depth: childDepth,
                         angle: 0, // Not used in vertical layout
                         radius: 0  // Not used in vertical layout
@@ -319,6 +319,16 @@ export class VerticalLayoutCalculator implements LayoutCalculator {
         }
         
         return depthMap;
+    }
+}
+
+// utilizes gravity algorithm to position nodes
+export class ClusterLayoutCalculator implements LayoutCalculator {
+    calculateLayout(graph: Graph): Map<number, NodeLayoutData> {
+        throw new Error("Method not implemented.")
+    }
+    generateEdges(graph: Graph, nodeLayouts: Map<number, NodeLayoutData>): EdgeLayoutData[] {
+        throw new Error("Method not implemented.")
     }
 }
 
