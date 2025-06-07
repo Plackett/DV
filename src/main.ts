@@ -23,7 +23,7 @@ function initializeAndRenderGraph() {
     myGraph.addNode(3)
     myGraph.addNode(3)
 
-    const layoutCalculator = new RadialLayoutCalculator();
+    const layoutCalculator = new VerticalLayoutCalculator();
 
     const nodeLayouts: Map<number, NodeLayoutData> = layoutCalculator.calculateLayout(myGraph);
     const edgeLayouts: EdgeLayoutData[] = layoutCalculator.generateEdges(myGraph, nodeLayouts);

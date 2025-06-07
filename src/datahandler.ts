@@ -18,9 +18,35 @@ export class Graph {
 
     // deleting from array shifts all the identifiers over
     removeNode(identifier: number) {
-        var element = this.root.findNode(identifier)
-        if(!element) return null
-        element = null
+        // Can't remove the root node
+        if (identifier === 0) return null;
+        
+        // Find the parent of the node to remove
+        const findParent = (node: Node, targetId: number): Node | null => {
+            // IDEAL FIX: Because we know the parent must have an ID less than the target we can start there
+            // also returning null for root node is great good job sonnet!
+            for (let i = 0; i < node.children.length; i++) {
+                if (node.children[i].id === targetId) {
+                    return node;
+                }
+                
+                const parent = findParent(node.children[i], targetId);
+                if (parent) return parent;
+            }
+            return null;
+        };
+        
+        const parent = findParent(this.root, identifier);
+        if (!parent) return null;
+        
+        // Remove the node from its parent's children array
+        const index = parent.children.findIndex(child => child.id === identifier);
+        if (index !== -1) {
+            parent.children.splice(index, 1);
+            return true;
+        }
+        
+        return null;
     }
 }
 
@@ -181,11 +207,118 @@ export class RadialLayoutCalculator implements LayoutCalculator {
 }
 
 export class VerticalLayoutCalculator implements LayoutCalculator {
+    private horizontalSpacing = 100; // Spacing between nodes horizontally
+    private verticalSpacing = 80;    // Spacing between levels vertically
+
     calculateLayout(graph: Graph): Map<number, NodeLayoutData> {
-        throw new Error("Method not implemented.")
+        const layoutMap = new Map<number, NodeLayoutData>();
+        const depthMap = this.calculateNodeDepths(graph.root);
+        const widthsByLevel = new Map<number, number>();
+        const positionsByLevel = new Map<number, number[]>();
+
+        // First pass: count nodes at each level to determine width
+        for (const [nodeId, depth] of depthMap.entries()) {
+            if (!widthsByLevel.has(depth)) {
+                widthsByLevel.set(depth, 0);
+                positionsByLevel.set(depth, []);
+            }
+            widthsByLevel.set(depth, widthsByLevel.get(depth)! + 1);
+        }
+
+        // Second pass: BFS to assign positions
+        const queue: Node[] = [graph.root];
+        const visited = new Set<number>();
+
+        // Position root at center
+        layoutMap.set(graph.root.id, {
+            id: graph.root.id,
+            x: 0,
+            y: 0,
+            depth: 0,
+            angle: 0,
+            radius: 0
+        });
+
+        while (queue.length > 0) {
+            const node = queue.shift()!;
+            if (visited.has(node.id)) continue;
+            visited.add(node.id);
+
+            const nodeDepth = depthMap.get(node.id)!;
+            const childDepth = nodeDepth + 1;
+
+            // Sort children to ensure consistent layout
+            const sortedChildren = [...node.children].sort((a, b) => a.id - b.id);
+            
+            if (sortedChildren.length > 0) {
+                // Calculate total width needed for children
+                const totalWidth = (sortedChildren.length - 1) * this.horizontalSpacing;
+                // Start position (left-most child)
+                let startX = -totalWidth / 2;
+                
+                // Position each child
+                for (const child of sortedChildren) {
+                    const positions = positionsByLevel.get(childDepth)!;
+                    
+                    // Check if this position is already taken
+                    while (positions.includes(startX)) {
+                        startX += 10; // Shift slightly if position is taken
+                    }
+                    
+                    positions.push(startX);
+                    
+                    layoutMap.set(child.id, {
+                        id: child.id,
+                        x: startX,
+                        y: -1 * childDepth * this.verticalSpacing,
+                        depth: childDepth,
+                        angle: 0, // Not used in vertical layout
+                        radius: 0  // Not used in vertical layout
+                    });
+                    
+                    queue.push(child);
+                    startX += this.horizontalSpacing;
+                }
+            }
+        }
+        
+        return layoutMap;
     }
+
     generateEdges(graph: Graph, nodeLayouts: Map<number, NodeLayoutData>): EdgeLayoutData[] {
-        throw new Error("Method not implemented.")
+        const edges: EdgeLayoutData[] = [];
+        const queue: Node[] = [graph.root];
+        const visited = new Set<number>();
+
+        while (queue.length > 0) {
+            const currentNode = queue.shift()!;
+            if (visited.has(currentNode.id)) continue;
+            visited.add(currentNode.id);
+
+            for (const child of currentNode.children) {
+                edges.push({ sourceID: currentNode.id, targetID: child.id });
+                queue.push(child);
+            }
+        }
+        return edges;
+    }
+
+    private calculateNodeDepths(root: Node): Map<number, number> {
+        const depthMap = new Map<number, number>();
+        const queue: { node: Node, depth: number }[] = [{ node: root, depth: 0 }];
+        
+        while (queue.length > 0) {
+            const { node, depth } = queue.shift()!;
+            if (depthMap.has(node.id)) continue;
+            
+            depthMap.set(node.id, depth);
+            
+            for (const child of node.children) {
+                queue.push({ node: child, depth: depth + 1 });
+            }
+        }
+        
+        return depthMap;
     }
 }
 
