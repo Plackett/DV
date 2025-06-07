@@ -1,6 +1,6 @@
 // radialLayoutCalculator.test.ts
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Graph, RadialLayoutCalculator, NodeLayoutData, EdgeLayoutData } from '../src/datahandler.ts'; // Adjust path if necessary
+import { Graph, RadialLayoutCalculator, VerticalLayoutCalculator, NodeLayoutData, EdgeLayoutData } from '../src/datahandler.ts'; // Adjust path if necessary
 import { buildGraphFromTestTreeWithSpecificIds, TestTreeDefinition } from './test-utils.ts'; // Assuming you implement this
 
 // Helper for comparing floating-point numbers due to precision issues
@@ -74,38 +74,7 @@ describe('RadialLayoutCalculator', () => {
             expect(node2Layout!.depth).toBe(1);
             expect(node1Layout!.radius).toBeGreaterThan(0);
             expect(node2Layout!.radius).toBeGreaterThan(0);
-            // Example: Expect angles to be ~PI radians (180 degrees) apart
-            // expectFloatCloseTo(Math.abs(node1Layout!.angle - node2Layout!.angle), Math.PI);
-        });
-
-        it('should place children of a node correctly based on their parent\'s angle and radius', () => {
-            // More complex setup for this, involves specific tree structures
-            // using `buildGraphFromTestTreeWithSpecificIds`
-            // Example:
-            /*
-            const testTree: TestTreeDefinition = {
-                description: "Tree for child positioning test",
-                nodes: [
-                    { parent: 0, id: 1 },
-                    { parent: 1, id: 2 },
-                    { parent: 1, id: 3 }
-                ]
-            };
-            const graph = buildGraphFromTestTreeWithSpecificIds(testTree);
-            const layout = calculator.calculateLayout(graph);
-            const node1Layout = layout.get(1);
-            const node2Layout = layout.get(2);
-            const node3Layout = layout.get(3);
-
-            // Assert that node 2 and 3 are correctly positioned relative to node 1
-            // e.g., their angles are within a certain range around node 1's angle
-            // and their radius is appropriate for depth 2.
-            */
-        });
-
-        it('should ensure no overlapping positions for nodes at the same depth and parent', () => {
-            // Requires a more advanced layout algorithm and potentially checking distances
-            // between sibling nodes based on their calculated (x,y)
+            expectFloatCloseTo(Math.abs(node1Layout!.angle - node2Layout!.angle), Math.PI);
         });
 
         it('should handle an empty graph gracefully', () => {
@@ -164,3 +133,72 @@ describe('RadialLayoutCalculator', () => {
         });
     });
 });
+
+describe('VerticalLayoutCalculator', () => {
+    let calculator: VerticalLayoutCalculator;
+
+    beforeEach(() => {
+        calculator = new VerticalLayoutCalculator();
+    });
+
+    describe('Layout Calculation (calculateLayout)', () => {
+        it('should place root node at 0,0 with depth 0', () => {
+            const graph = new Graph()
+            const layout = calculator.calculateLayout(graph)
+            const rootLayout = layout.get(0)
+            expect(rootLayout).toBeDefined()
+            expectFloatCloseTo(rootLayout!.x, 0)
+            expectFloatCloseTo(rootLayout!.y, 0)
+            expect(rootLayout!.depth).toBe(0)
+        })
+
+        it('should place child node below root with depth 1', () => {
+            const graph = new Graph()
+            graph.addNode(0)
+            const layout = calculator.calculateLayout(graph)
+            const childLayout = layout.get(1)
+            if(childLayout === undefined) throw console.error("Couldn't get child layout");
+            expect(childLayout.y < 0).toBe(true)
+            expect(childLayout.depth).toBe(1)
+        })
+
+        it('should calculate correct depths for nodes in a simple linear graph', () => {
+            // Setup a graph: 0 -> 1 -> 2 -> 3
+            const graph = new Graph();
+            graph.addNode(0); // 1
+            graph.addNode(1); // 2
+            graph.addNode(2); // 3
+
+            const layout = calculator.calculateLayout(graph);
+            expect(layout.get(0)?.depth).toBe(0);
+            expect(layout.get(1)?.depth).toBe(1);
+            expect(layout.get(2)?.depth).toBe(2);
+            expect(layout.get(3)?.depth).toBe(3);
+        });
+
+        it('should calculate correct depths for nodes in a balanced tree', () => {
+            // Setup a graph: 0 -> (1,2), 1 -> (3,4), 2 -> (5,6)
+            const graph = new Graph();
+            graph.addNode(0); graph.addNode(0); // 1, 2
+            graph.addNode(1); graph.addNode(1); // 3, 4
+            graph.addNode(2); graph.addNode(2); // 5, 6
+
+            const layout = calculator.calculateLayout(graph);
+            expect(layout.get(0)?.depth).toBe(0);
+            expect(layout.get(1)?.depth).toBe(1);
+            expect(layout.get(2)?.depth).toBe(1);
+            expect(layout.get(3)?.depth).toBe(2);
+            expect(layout.get(4)?.depth).toBe(2);
+            expect(layout.get(5)?.depth).toBe(2);
+            expect(layout.get(6)?.depth).toBe(2);
+        });
+
+        it('should handle an empty graph gracefully', () => {
+            const graph = new Graph();
+            const layout = calculator.calculateLayout(graph);
+            expect(layout.size).toBe(1); // Only root node should be present
+            expect(layout.get(0)).toBeDefined();
+        });
+
+    })
+})

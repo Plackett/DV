@@ -13,7 +13,6 @@ describe('Graph Class', () => {
         it('should correctly initialize the root node with id 0', () => {
             expect(graph.root).toBeInstanceOf(Node);
             expect(graph.root.id).toBe(0);
-            expect(graph.root.parent).toBeUndefined();
         });
 
         it('should initialize nextID to 1', () => {
@@ -26,7 +25,6 @@ describe('Graph Class', () => {
             graph.addNode(0); // Add a child to the root (id 0)
             const childNode = graph.root.children[0];
             expect(childNode).toBeInstanceOf(Node);
-            expect(childNode.parent).toBe(graph.root);
             expect(childNode.id).toBe(1);
         });
 
@@ -60,11 +58,9 @@ describe('Graph Class', () => {
         it('should maintain correct parent-child relationship for new nodes', () => {
             graph.addNode(0); // Node with id 1
             const child1 = graph.root.children[0];
-            expect(child1.parent).toBe(graph.root);
 
             graph.addNode(child1.id); // Node with id 2, child of id 1
-            const grandchild1 = child1.children[0];
-            expect(grandchild1.parent).toBe(child1);
+            expect(child1.children[0]).not.toBeNull()
         });
     });
 
@@ -74,30 +70,44 @@ describe('Graph Class', () => {
 
         it('should remove the specified node from its parent\'s children array', () => {
             // Arrange
-            // graph.addNode(0); // Node with id 1
-            // graph.addNode(0); // Node with id 2
-            // const nodeToRemoveId = 1;
+            graph.addNode(0); // Node with id 1
+            graph.addNode(0); // Node with id 2
+            const nodeToRemoveId = 1;
 
             // Act (assuming corrected removeNode)
-            // const removedNode = graph.removeNode(nodeToRemoveId);
+            const removedNode = graph.removeNode(nodeToRemoveId);
 
             // Assert (assuming corrected removeNode)
-            // expect(removedNode).not.toBeNull();
-            // expect(graph.root.children.length).toBe(1);
-            // expect(graph.root.children.some(child => child.id === nodeToRemoveId)).toBeFalsy();
+            expect(removedNode).not.toBeNull();
+            expect(graph.root.children.length).toBe(1);
+            expect(graph.root.children.some(child => child.id === nodeToRemoveId)).toBeFalsy();
         });
 
         it('should return null if the node to be removed is not found', () => {
             // Act (assuming corrected removeNode)
-            // const result = graph.removeNode(999);
+            const result = graph.removeNode(999);
             // Assert
-            // expect(result).toBeNull();
+            expect(result).toBeNull();
         });
 
-        // Add more `removeNode` tests here once implemented correctly:
-        // - `should correctly handle removing a leaf node.`
-        // - `should correctly handle removing a node with children (e.g., re-parenting, or removing subtree).`
-        // - `should not affect other nodes in the graph.`
-        // - `should handle attempts to remove the root node.`
+        it('should correctly handle removing a node with children', () => {
+            graph.addNode(0)
+            graph.addNode(1)
+            graph.addNode(1)
+            graph.addNode(1)
+            graph.addNode(2)
+
+            graph.removeNode(1)
+
+            expect(graph.removeNode(1)).toBeNull()
+            expect(graph.removeNode(2)).toBeNull()
+            expect(graph.removeNode(3)).toBeNull()
+            expect(graph.removeNode(4)).toBeNull()
+        })
+
+        it('should handle attemps to remove the root node', () => {
+            expect(graph.removeNode(0)).toBeNull()
+        })
+
     });
 });

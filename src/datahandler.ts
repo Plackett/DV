@@ -5,13 +5,13 @@ export class Graph {
     nextID: number = 1
 
     constructor() {
-        this.root = new Node(undefined,0)
+        this.root = new Node(0)
     }
 
     addNode(identifier: number) {
         const element = this.root.findNode(identifier)
         if(!element) return null
-        const next = new Node(element,this.nextID)
+        const next = new Node(this.nextID)
         this.nextID = this.nextID + 1
         element.children.push(next)
     }
@@ -25,12 +25,10 @@ export class Graph {
 }
 
 export class Node {
-    parent: Node | undefined
     children: Array<Node>
     id: number
 
-    constructor(par : Node | undefined, identifier: number) {
-        this.parent = par
+    constructor(identifier: number) {
         this.children = []
         this.id = identifier
     }
@@ -51,21 +49,26 @@ export class Node {
 
 // this section is for when it actually becomes a picture
 // ------------------------------------------------------
-export class NodeLayoutData {
-    id: number = 0
-    x: number = 0
-    y: number = 0
-    depth: number = 0
-    angle: number = 0
-    radius: number = 0
+export interface NodeLayoutData {
+    id: number
+    x: number
+    y: number
+    depth: number
+    angle: number
+    radius: number
 }
 
-export class EdgeLayoutData {
-    sourceID: number = 0
-    targetID: number = 0
+export interface EdgeLayoutData {
+    sourceID: number
+    targetID: number
 }
 
-export class RadialLayoutCalculator {
+interface LayoutCalculator {
+    calculateLayout(graph: Graph): Map<number, NodeLayoutData>;
+    generateEdges(graph: Graph, nodeLayouts: Map<number, NodeLayoutData>): EdgeLayoutData[];
+}
+
+export class RadialLayoutCalculator implements LayoutCalculator {
     private radiusIncrement = 80; // How much radius increases per depth level
     private minAnglePerLeafNode = Math.PI / 12; // minimum angle between leaves
 
@@ -174,6 +177,15 @@ export class RadialLayoutCalculator {
             }
         }
         return edges;
+    }
+}
+
+export class VerticalLayoutCalculator implements LayoutCalculator {
+    calculateLayout(graph: Graph): Map<number, NodeLayoutData> {
+        throw new Error("Method not implemented.")
+    }
+    generateEdges(graph: Graph, nodeLayouts: Map<number, NodeLayoutData>): EdgeLayoutData[] {
+        throw new Error("Method not implemented.")
     }
 }
 

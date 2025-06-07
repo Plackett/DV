@@ -1,5 +1,5 @@
 // main.ts
-import { Graph, RadialLayoutCalculator, NodeLayoutData, EdgeLayoutData } from './datahandler.ts';
+import { Graph, RadialLayoutCalculator, VerticalLayoutCalculator, NodeLayoutData, EdgeLayoutData } from './datahandler.ts';
 import * as fs from 'fs';
 
 // Imagine you have a rendering component or function
@@ -30,17 +30,7 @@ function initializeAndRenderGraph() {
 
     console.log("Calculated Node Layouts:", Array.from(nodeLayouts.values()));
     console.log("Calculated Edge Layouts:", edgeLayouts);
-
-    // 5. If you had a rendering layer, you'd pass this data to it:
-    // const canvasElement = document.getElementById('myCanvas'); // In a browser environment
-    // if (canvasElement) {
-    //     renderGraphToCanvas(canvasElement, nodeLayouts, edgeLayouts);
-    // } else {
-    //     console.warn("Canvas element not found. Graph not rendered visually.");
-    // }
-
     console.log("Graph processing complete.");
-
     console.log("\n--- Generating SVG Output ---");
 
     const svgWidth = 800;
