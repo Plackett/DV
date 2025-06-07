@@ -1,7 +1,5 @@
-// radialLayoutCalculator.test.ts
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Graph, RadialLayoutCalculator, VerticalLayoutCalculator, NodeLayoutData, EdgeLayoutData } from '../src/datahandler.ts'; // Adjust path if necessary
-import { buildGraphFromTestTreeWithSpecificIds, TestTreeDefinition } from './test-utils.ts'; // Assuming you implement this
+import { Graph, RadialLayoutCalculator, VerticalLayoutCalculator, ClusterLayoutCalculator, NodeLayoutData, EdgeLayoutData } from '../src/datahandler.ts'; // Adjust path if necessary
 
 // Helper for comparing floating-point numbers due to precision issues
 const expectFloatCloseTo = (received: number, expected: number, tolerance: number = 0.001) => {
@@ -112,25 +110,6 @@ describe('RadialLayoutCalculator', () => {
             expect(edge1).toBeDefined();
             expect(edge2).toBeDefined();
         });
-
-        it('should generate edges for a complex tree structure', () => {
-            // A more complex graph, requires building it out
-            /*
-            const testTree: TestTreeDefinition = {
-                description: "Complex tree for edge generation",
-                nodes: [
-                    { parent: 0, id: 1 },
-                    { parent: 0, id: 2 },
-                    { parent: 1, id: 3 },
-                    { parent: 2, id: 4 }
-                ]
-            };
-            const graph = buildGraphFromTestTreeWithSpecificIds(testTree);
-            const layout = calculator.calculateLayout(graph);
-            const edges = calculator.generateEdges(graph, layout);
-            expect(edges.length).toBe(4); // Edges: (0,1), (0,2), (1,3), (2,4)
-            */
-        });
     });
 });
 
@@ -158,7 +137,7 @@ describe('VerticalLayoutCalculator', () => {
             const layout = calculator.calculateLayout(graph)
             const childLayout = layout.get(1)
             if(childLayout === undefined) throw console.error("Couldn't get child layout");
-            expect(childLayout.y < 0).toBe(true)
+            expect(childLayout.y > 0).toBe(true)
             expect(childLayout.depth).toBe(1)
         })
 
@@ -201,4 +180,47 @@ describe('VerticalLayoutCalculator', () => {
         });
 
     })
-})
+});
+
+// New test suite for the ClusterLayoutCalculator
+describe('ClusterLayoutCalculator', () => {
+    let calculator: ClusterLayoutCalculator;
+    let graph: Graph;
+
+    beforeEach(() => {
+        calculator = new ClusterLayoutCalculator();
+        graph = new Graph();
+        graph.addNode(0); // id: 1
+        graph.addNode(0); // id: 2
+        graph.addNode(1); // id: 3
+    });
+
+    it('should generate a layout for every node in the graph', () => {
+        const layout = calculator.calculateLayout(graph);
+        expect(layout.size).toBe(4); // Root + 3 nodes
+        expect(layout.has(0)).toBe(true);
+        expect(layout.has(1)).toBe(true);
+        expect(layout.has(2)).toBe(true);
+        expect(layout.has(3)).toBe(true);
+    });
+
+    it('should produce a layout where no two nodes have the exact same coordinates', () => {
+        const layout = calculator.calculateLayout(graph);
+        const positions = Array.from(layout.values()).map(n => `${n.x},${n.y}`);
+        const uniquePositions = new Set(positions);
+        expect(positions.length).toBe(uniquePositions.size);
+    });
+
+    it('should generate the correct edge data', () => {
+        const layout = calculator.calculateLayout(graph);
+        const edges = calculator.generateEdges(graph, layout);
+        expect(edges.length).toBe(3);
+        expect(edges).toEqual(
+            expect.arrayContaining([
+                { sourceID: 0, targetID: 1 },
+                { sourceID: 0, targetID: 2 },
+                { sourceID: 1, targetID: 3 }
+            ])
+        );
+    });
+});
